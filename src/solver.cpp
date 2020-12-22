@@ -6,10 +6,12 @@
 #include "types.hpp"
 
 using namespace Eigen;
+#define TEST_PV 5
 
 solver::solver(model &a)
-    : _model(a), _jacobian(jacobian_gen(_model._admit, _model._busses, 5, _model)) {
-  deltas.resize(2 * _model._n_busses - 2 - 5);
+    : _model(a),
+      _jacobian(jacobian_gen(_model._admit, _model._busses, TEST_PV, _model)) {
+  deltas.resize(2 * _model._n_busses - 2 - TEST_PV);
 }
 
 solver::~solver() {}
@@ -39,73 +41,88 @@ double solver::calc_q(size_t i) {
 }
 
 void solver::calculate_deltas() {
+  std::vector<double> mismatch;
   int counter = 0;
-  for (size_t i = 1; i < _model._n_busses ; i++) {
+  for (size_t i = 1; i < _model._n_busses; i++) {
     /* code */
-    deltas(i) =
+    auto test =
         -1 * _model._busses[i]._loads.real() + _model._busses[i]._p - calc_p(i);
+    deltas(i - 1) = test;
+    mismatch.push_back(test);
     counter++;
   }
 
-  // for (size_t i = 0; i < _model._n_busses - 1 - 5; i++) {
-  //   /* code */
-  //   deltas(i + _model._n_busses - 1) =
-  //       -1 * _model._busses[i + 1]._loads.imag() + _model._busses[i + 1]._q - calc_q(i);
-  //   counter++;
-  // }
-
-  for (size_t i = 1; i < _model._n_busses ; i++) {
+  size_t pv_seen = 0;
+  for (size_t i = 1; i < _model._n_busses; i++) {
     /* code */
-    if(_model._busses[i]._type != bus_type::pv)
-    deltas(i ) =
-        -1 * _model._busses[i ]._loads.imag() + _model._busses[i ]._q - calc_q(i);
+    if (_model._busses[i]._type != bus_type::pv) {
+      auto test2 = -1 * _model._busses[i]._loads.imag() + _model._busses[i]._q -
+                   calc_q(i);
+      deltas(i - 1 + _model._n_busses - 1 - pv_seen) = test2;
+    } else {
+      pv_seen++;
+    }
     counter++;
   }
+  auto max = std::max_element(mismatch.begin(), mismatch.end());
 
-  std::cout << deltas << std::endl;
+
   std::cout << "===============>>>" << std::endl;
+  std::cout << *max << std::endl;
   // std::cout << "";
-  // deltas(0) = -4 - (calc_p(1));
-  // deltas(1) = 2 - (calc_p(2));
-  // deltas(2) = -2.5 - (calc_q(1));
+}
+void solver::calculate_deltas2() {
+  deltas(0) = -4 - (calc_p(1));
+  deltas(1) = 2 - (calc_p(2));
+  deltas(2) = 2 - (calc_p(3));
+  deltas(3) = -2.5 - (calc_q(1));
+  deltas(4) = -2.5 - (calc_q(3));
 }
 
 void solver::eval_deltas(Eigen::Matrix<double, Dynamic, 1> &sol) {
   int counter = 0;
-  for (size_t i = 0; i < _model._n_busses - 1; i++) {
+  for (size_t i = 1; i < _model._n_busses; i++) {
     /* code */
-    _model._busses[i + 1].angle += sol(i);
+    _model._busses[i].angle += sol(i - 1);
     counter++;
   }
-
-  for (size_t i = 0; i < _model._n_busses - 1 - 5; i++) {
+  size_t pv_seen = 0;
+  for (size_t i = 1; i < _model._n_busses; i++) {
     /* code */
-    _model._busses[i + 1].voltage += sol(i + _model._n_busses - 1);
-    counter++;
+    if (_model._busses[i]._type != bus_type::pv) {
+      _model._busses[i].voltage += sol(i - 1 + _model._n_busses - 1 - pv_seen);
+    } else {
+      pv_seen++;
+    }
+    if (i - 1 + _model._n_busses - 1 - TEST_PV == 52) counter++;
   }
 
   // std::cout << deltas << std::endl;
   // std::cout << "";
   // deltas(0) = -4 - (calc_p(1));
   // deltas(1) = 2 - (calc_p(2));
-  // deltas(2) = -2.5 - (calc_q(1));
+  // deltas(2) = -2.TEST_PV - (calc_q(1));
 }
 
 void solver::solve() {
-  for (size_t i = 0; i < 3; i++) {
+  Eigen::Matrix<double, Dynamic, 1> sol;
+  for (size_t i = 0; i < 10; i++) {
     calculate_deltas();
     auto mat = _jacobian.get_jacobian();
-    _jacobian.print_jacobians();
+    // _jacobian.print_jacobians();
     // std::cout << mat;
 
-    Eigen::Matrix<double, Dynamic, 1> sol =
-        mat.colPivHouseholderQr().solve(deltas);
+    // mat.colPivHouseholderQr().solve(deltas);
+    sol = mat.fullPivLu().solve(deltas);
+    //  double relative_error = (mat *sol - deltas).norm() / deltas.norm(); //
+    //  norm() is L2 norm std::cout << "The relative error is:\n" <<
+    //  relative_error << std::endl;
     eval_deltas(sol);
 
     // std::cout << sol << std::endl ;
   }
 
   std::for_each(_model._busses.begin(), _model._busses.end(), [](bus &i) {
-    std::cout << i.voltage << "< " << i.angle * (180 / M_PI) << std::endl;
+    std::cout << i._number<< " : " << i.voltage << "< " << i.angle * (180 / M_PI) << std::endl;
   });
 }

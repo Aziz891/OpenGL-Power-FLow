@@ -12,7 +12,7 @@ private:
     /* data */
     
 public:
-    bus(double value, double value2, std::string name, int number, bus_type type);
+    bus(double value, double value2, std::string name, int number , bus_type type );
     ~bus();
 double voltage = 1;
 double angle = 0;

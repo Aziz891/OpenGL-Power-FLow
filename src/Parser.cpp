@@ -37,7 +37,12 @@ void Parser::read_busses(std::ifstream &filestream) {
       counter++;
     }
     // std::cout << line << std::endl;
-    _model._busses.push_back(bus(voltage, 0, name, number, type));
+    if (type == bus_type::pv) {
+      _model._busses.push_back(bus(voltage, 0, name, number, type));
+    } else {
+      _model._busses.push_back(bus(voltage, 0, name, number, type));
+
+    }
   }
 }
 void Parser::read_branches(std::ifstream &filestream) {
@@ -124,11 +129,14 @@ void Parser::read_transformers(std::ifstream &filestream) {
       counter2++;
     } while (counter2 < 4 && std::getline(filestream, string_line));
     // std::cout << string_line << std::endl;
-    const double hs_factor = (pow(tab_tf, 2) / (1 - tab_tf));
-    const double ls_factor = (tab_tf / (tab_tf - 1));
+    // tab_tf = 0.99;
+    // tab_tf = 1 / tab_tf;
+    double hs_factor = ((1 - tab_tf) / pow(tab_tf, 2));
+    double ls_factor = ((tab_tf - 1) / tab_tf);
 
-    std::vector<pf_rect> vec_admit{hs_factor * pf_rect(0, tab_tf),
-                                   ls_factor * pf_rect(0, tab_tf)};
+    std::vector<pf_rect> vec_admit{
+        hs_factor * 1 * (pf_rect(1, 0) / pf_rect(r, x)),
+        ls_factor * 1 * (pf_rect(1, 0) / pf_rect(r, x))};
     _model._lines.push_back(
         line(from_bus, to_bus, tab_tf * pf_rect(r, x), vec_admit));
   }
@@ -161,11 +169,13 @@ void Parser::read_loads(std::ifstream &filestream) {
       counter++;
     }
     // std::cout << line << std::endl;
-    _model._busses[number - 1]._loads = pf_rect{p, q};
+    _model._busses[number - 1]._loads = pf_rect{p, q} / pf_rect{100, 0};
   }
 }
 void Parser::read_shunts(std::ifstream &filestream) {
   std::string line;
+  _model._busses[9]._q += 19.0 / 100;
+  _model._busses[23]._q += 4.3 / 100;
   auto const regex = std::regex("^\\s*0[\\s\\S]*");
   while (std::getline(filestream, line) && !std::regex_match(line, regex)) {
     // std::istringstream stream(line);
@@ -223,13 +233,13 @@ void Parser::read_generators(std::ifstream &filestream) {
       counter++;
     }
     // std::cout << line << std::endl;
-    if (number != 1) _model._busses[number - 1]._p = power;
+    if (number != 1) _model._busses[number - 1]._p = power / 100;
   }
 }
 Parser::~Parser() {}
 
 void Parser::read() {
-  std::ifstream filestream("../IEEE 30 bus.RAW");
+  std::ifstream filestream("../ieee_30_bus.raw");
   std::string line;
   auto const regex = std::regex("^\\s*0[\\s\\S]*");
   std::getline(filestream, line);
