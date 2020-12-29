@@ -11,6 +11,7 @@ private:
     /* data */
     std::string _file_path;
     model &_model;
+    int _counter =0;
 public:
     Parser(model &model);
     ~Parser();

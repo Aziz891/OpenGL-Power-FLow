@@ -1,10 +1,14 @@
 #include <SDL2/SDL.h>
 #include <assimp/postprocess.h>  // Post processing flags
 #include <assimp/scene.h>        // Output data structure
+#include <math.h>
 
 #include <algorithm>            // for std::for_each
 #include <assimp/Importer.hpp>  // C++ importer interface
-#include<iostream>
+#include <iostream>
+#include <memory>
+
+#include "Graph.hpp"
 #include "InputHandler.hpp"
 #include "Parser.hpp"
 #include "camera.h"
@@ -15,15 +19,15 @@
 #include "solver.hpp"
 #include "texture.h"
 #include "transform.h"
-#include "Graph.hpp"
+#include "render.hpp"
+#define SCREEN_SCALE 1
 
-static const int DISPLAY_WIDTH = 800;
-static const int DISPLAY_HEIGHT = 600;
+static const int DISPLAY_WIDTH = 1800/( SCREEN_SCALE);
+static const int DISPLAY_HEIGHT = 900/( SCREEN_SCALE);
 
 int main(int argc, char** argv) {
   // create a typedef for the Graph type
   // typedef adjacency_list<vecS, vecS, bidirectionalS> Graph;
-
 
   // Assimp::Importer importer;
   model model;
@@ -34,6 +38,11 @@ int main(int argc, char** argv) {
   solver solver(model);
   solver.solve();
   Power_Graph g(model);
+  Display display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
+  Renderer r(g.get_line_order(), model);
+  auto meshes = r.render();
+      std::cout << "";
+
 
   // And have it read the given file with some example postprocessing
   // Usually - if speed is not the most important aspect for you - you'll
@@ -53,7 +62,6 @@ int main(int argc, char** argv) {
   //   Mesh::Mesh(Vertex* vertices, unsigned int numVertices, unsigned int*
   //   indices, unsigned int numIndices)
   // Mesh test()
-  Display display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
 
   Vertex vertices[] = {
       Vertex(glm::vec3(-20, -1, -1), glm::vec2(1, 0), glm::vec3(0, 0, -1)),
@@ -104,23 +112,49 @@ int main(int argc, char** argv) {
 
   Mesh monkey("../res/sub.obj");
   Mesh monkey2("../res/sub.obj");
-  std::vector<Mesh*> meshes;
-  for (size_t i = 0; i < 15; i++) {
-    /* code */
-    Mesh* temp;
-    if (i == 0) {
-      temp = new Mesh("../res/sub2.obj", glm::vec3(80.0f * i, 0.0f, 0.0f));
-      temp->SetScale(glm::vec3(2.0f, 50.0f, 2.0f));
 
-    } else {
-      temp = new Mesh("../res/sub.obj", glm::vec3(80.0f * i, 0.0f, 0.0f));
-      temp->SetScale(glm::vec3(5.0f, 5.0f, 5.0f));
-    }
-    meshes.push_back(temp);
+
+  for (size_t i = 0; i < 1; i++) {
+    /* code */
+    // auto temp = std::make_unique<Mesh>(new Mesh("../res/sub.obj",
+    // glm::vec3(0.0f, 0.0f, 0.0f)));
   }
 
+  // float scaling_factor = 50.0;
+  // float rot_angle = 0.0f;
+  // float rot_angle_y = 0.0f;
+  // float rot_angle_x = 0.0;
+  // const double line_wdith = 0.5;
+  // meshes.push_back(std::make_unique<Mesh>(
+  //     "../res/sub.obj", glm::vec3(0.0f, 0.0f, 0.0f),
+  //     glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
+
+  // for (size_t i = 0; i < 2; i++) {
+  //   /* code */
+  //   meshes.push_back(
+  //       std::make_unique<Mesh>("../res/sub3.obj", glm::vec3(0.0f, 0.0f, 0.0f),
+  //                              glm::vec3(rot_angle_x, rot_angle_y, rot_angle),
+  //                              glm::vec3(0.5f, scaling_factor, 0.5f)));
+  //   // rot_angle_x += M_PI_4;
+  //   auto test2 = meshes[i]->GetModel();
+
+  //   meshes.push_back(std::make_unique<Mesh>(
+  //       "../res/sub.obj", glm::vec3(0.0f, 0.0f, 0.0f),
+  //       glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
+  //       meshes.back()->SetCoord(glm::translate(glm::rotate(rot_angle, glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0.0f, scaling_factor, 0.0f)));
+  //       auto temp =  meshes.back()->GetCoord();
+  //   meshes.push_back(std::make_unique<Mesh>(
+  //       "../res/sub.obj", glm::vec3(0.0f, 0.0f, 0.0f),
+  //       glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
+  //       meshes.back()->SetCoord(temp * glm::translate(glm::rotate(rot_angle, glm::vec3(0.0f, 0.0f, 1.0f)), glm::vec3(0.0f, scaling_factor, 0.0f)));
+
+  //   rot_angle += M_PI_4;
+  //   // rot_angle_y += M_PI_4;
+  // }
+
   Shader shader("../shaders/basicShader");
-  Texture texture("../res/bricks.jpg");
+  Texture texture("../res/red2.jpg");
+  Texture texture2("../res/blue.jpg");
   Transform transform;
   Transform transform2;
   Camera camera(glm::vec3(0.0f, 0.0f, -150.0f), 70.0f,
@@ -175,27 +209,34 @@ int main(int argc, char** argv) {
     // transform.GetScale()->y = absSinCounter;
 
     shader.Bind();
-    texture.Bind();
     // shader.Update(transform, camera, monkey);
 
     // shader.Update(transform, camera, monkey2);
     //   monkey2.Draw();
     size_t counter2 = 0;
-    for (auto i : meshes) {
+    for (auto& i : meshes) {
       auto increment = glm::vec3(0.0f, 0.7f * counter * counter2, 0.0f);
-      i->SetRot(increment);
+      if (counter2 % 2 == 0) {
+        texture.Bind();
+
+      } else {
+        texture2.Bind();
+      }
+      // i->SetRot(increment);
       shader.Update(transform, camera, *i);
       i->Draw();
       counter2++;
+      // if (counter2 > 50)
+      // break;
     }
 
     display.SwapBuffers();
     SDL_Delay(1);
     counter += 0.01f;
   }
-  for (auto p : meshes) {
-    delete p;
-  }
+  // for (auto p : meshes) {
+  //   delete p;
+  // }
   meshes.clear();
   return 0;
 }

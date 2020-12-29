@@ -48,8 +48,10 @@ void Parser::read_busses(std::ifstream &filestream) {
 void Parser::read_branches(std::ifstream &filestream) {
   std::string string_line;
   auto const regex = std::regex("^\\s*0[\\s\\S]*");
+  
   while (std::getline(filestream, string_line) &&
          !std::regex_match(string_line, regex)) {
+    _counter++;
     std::istringstream stream(string_line);
     std::string value;
     size_t counter = 0;
@@ -82,7 +84,7 @@ void Parser::read_branches(std::ifstream &filestream) {
     }
     // std::cout << string_line << std::endl;
     std::vector<pf_rect> vec_admit(2, pf_rect(0, half_b));
-    _model._lines.push_back(line(from_bus, to_bus, pf_rect(r, x), vec_admit));
+    _model._lines.push_back(line(_counter, from_bus, to_bus, pf_rect(r, x), vec_admit));
     // _model._lines.push_back(
     //     line(from_bus, to_bus, pf_rect{r, x}, pf_rect{0, half_b}
     //     )
@@ -94,6 +96,7 @@ void Parser::read_transformers(std::ifstream &filestream) {
   auto const regex = std::regex("^\\s*0[\\s\\S]*");
   while (std::getline(filestream, string_line) &&
          !std::regex_match(string_line, regex)) {
+    _counter++;
     std::string value;
     size_t counter = 0;
     size_t counter2 = 0;
@@ -138,7 +141,7 @@ void Parser::read_transformers(std::ifstream &filestream) {
         hs_factor * 1 * (pf_rect(1, 0) / pf_rect(r, x)),
         ls_factor * 1 * (pf_rect(1, 0) / pf_rect(r, x))};
     _model._lines.push_back(
-        line(from_bus, to_bus, tab_tf * pf_rect(r, x), vec_admit));
+        line(_counter, from_bus, to_bus, tab_tf * pf_rect(r, x), vec_admit));
   }
 }
 void Parser::read_loads(std::ifstream &filestream) {

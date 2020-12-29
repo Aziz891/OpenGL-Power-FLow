@@ -45,33 +45,44 @@ public:
 
 	void Draw();
 
-		 glm::mat4 GetModel() const
+		 glm::mat4 GetModel(glm::mat4 coord= glm::mat4(1.0f) ) const
 	{
-		glm::mat4 posMat = glm::translate(_pos);
+		glm::mat4 posMat = glm::translate(  _pos);
+
 		glm::mat4 scaleMat = glm::scale(_scale);
 		glm::mat4 rotX = glm::rotate(_rot.x, glm::vec3(1.0, 0.0, 0.0));
 		glm::mat4 rotY = glm::rotate(_rot.y, glm::vec3(0.0, 1.0, 0.0));
 		glm::mat4 rotZ = glm::rotate(_rot.z, glm::vec3(0.0, 0.0, 1.0));
-		glm::mat4 rotMat = rotX * rotY * rotZ;
 
-		return posMat * rotMat * scaleMat;
+		glm::mat4 rotMat = rotX * rotY * rotZ;
+		// if(test_cord) {
+		// posMat = glm::translate(rotMat ,_pos);
+		// rotZ = glm::rotate(0.0f, glm::vec3(0.0, 0.0, 1.0));
+
+		// }
+
+		return ( _coord * posMat *  rotMat * scaleMat)  ;
 	}
 
 	virtual ~Mesh();
 		inline glm::vec3* GetPos() { return &_pos; }
 	inline glm::vec3* GetRot() { return &_rot; }
 	inline glm::vec3* GetScale() { return &_scale; }
+	inline glm::mat4& GetCoord() { return _coord; }
 
 	inline void SetPos(glm::vec3 pos) { this->_pos = pos; }
+	inline void SetCoord(glm::mat4 coord) { this->_coord = coord; }
 	inline void SetRot(glm::vec3 rot) { this->_rot = rot; }
 	inline void SetScale(glm::vec3 scale) { this->_scale = scale; }
 	void operator=(const Mesh& mesh) {}
 	Mesh(const Mesh& mesh) {}
+	bool test_cord =false;
 protected:
 private:
 	glm::vec3 _pos ;
 	glm::vec3 _rot ;
 	glm::vec3 _scale ;
+	glm::mat4 _coord = glm::mat4(1.0);
 	static const unsigned int NUM_BUFFERS = 4;
 
     void InitMesh(const IndexedModel& model);
