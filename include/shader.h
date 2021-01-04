@@ -10,9 +10,10 @@ class Shader
 {
 public:
 	Shader(const std::string& fileName);
+	Shader(const glm::vec4 color);
 
 	void Bind();
-	void Update(const Transform& transform, const Camera& camera, const Mesh& mesh);
+	void Update(const Transform& transform, const Camera& camera,  Mesh& mesh);
 
 	virtual ~Shader();
 protected:
@@ -29,6 +30,7 @@ private:
 	GLuint m_program;
 	GLuint m_shaders[NUM_SHADERS];
 	GLuint m_uniforms[NUM_UNIFORMS];
+	glm::vec4 _color = glm::vec4(1.0, 1.0, 0.0,  1.0) ;
 };
 
 #endif

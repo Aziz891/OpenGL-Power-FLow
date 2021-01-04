@@ -7,8 +7,8 @@
 #include <iostream>
 #include <stdlib.h>
 
-Mesh::Mesh(  std::string fileName,  glm::vec3 pos ,  glm::vec3 rot ,  glm::vec3 scale )
-: _pos(pos), _rot(rot), _scale(scale)
+Mesh::Mesh(  std::string fileName,  glm::vec3 pos ,  glm::vec3 rot ,  glm::vec3 scale, mesh_type type, glm::vec4 color  )
+: _pos(pos), _rot(rot), _scale(scale), _type(type), _color(color)
 {
 	 
     InitMesh(OBJModel(fileName).ToIndexedModel());

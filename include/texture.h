@@ -8,6 +8,7 @@ class Texture
 {
 public:
 	Texture(const std::string& fileName);
+	Texture();
 
 	void Bind();
 
@@ -18,6 +19,7 @@ private:
 	void operator=(const Texture& texture) {}
 
 	GLuint m_texture;
+	bool isUniformColor = false;
 };
 
 #endif
