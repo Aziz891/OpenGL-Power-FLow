@@ -9,7 +9,6 @@ varying vec3 normal0;
 
 uniform mat4 MVP;
 uniform mat4 Normal;
-uniform mat4 Test;
 
 void main()
 {

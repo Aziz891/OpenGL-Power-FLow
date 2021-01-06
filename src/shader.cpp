@@ -58,7 +58,6 @@ void Shader::Update(const Transform& transform, const Camera& camera,  Mesh& mes
     Test = glm::vec4( std::min(redColor, 1.0), 0, std::max(blueColor, 0.0),1);
 
     }
-	// glm::mat4 Test = glm::mat4(2.0f);
 
 	glUniformMatrix4fv(m_uniforms[0], 1, GL_FALSE, &MVP[0][0]);
 	glUniformMatrix4fv(m_uniforms[1], 1, GL_FALSE, &Normal[0][0]);

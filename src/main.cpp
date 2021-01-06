@@ -38,19 +38,10 @@ int main(int argc, char** argv) {
   Display display(DISPLAY_WIDTH, DISPLAY_HEIGHT, "OpenGL");
   Renderer r(g.get_line_order(), model);
   auto meshes = r.render();
-      std::cout << "";
-
-
-
-
-  Mesh monkey("../res/sub.obj");
-  Mesh monkey2("../res/sub.obj");
-
-
 
   Shader shader("../shaders/basicShader");
   shader._model = &model;
-  Texture texture("../res/arrow.jpg");
+  Texture texture("../res/bricks.jpg");
   Texture texture2;
   Transform transform;
   Transform transform2;
@@ -96,15 +87,6 @@ int main(int argc, char** argv) {
 
     display.Clear(1.0f, 1.0f, 1.0f, 1.0f);
 
-    float redCounter = (1 + cosf(counter)) * 0.5;
-    float blueCounter = (1 + cosf(counter + M_PI)) * 0.5;
-    float greenCounter = (1 + cosf(counter + M_PI_2f32)) * 0.5;
-
-    // transform.GetRot()->y = counter * 100;
-    // transform.GetPos()->x = sinCounter;
-    // transform.GetRot()->z = counter * 100;
-    // transform.GetScale()->x = absSinCounter;
-    // transform.GetScale()->y = absSinCounter;
 
     shader.Bind();
 
@@ -121,17 +103,13 @@ int main(int argc, char** argv) {
       shader.Update(transform, camera, *i);
       i->Draw();
       counter2++;
-      // if (counter2 > 50)
-      // break;
     }
 
     display.SwapBuffers();
     SDL_Delay(1);
     counter += 0.01f;
   }
-  // for (auto p : meshes) {
-  //   delete p;
-  // }
+ 
   meshes.clear();
   return 0;
 }
