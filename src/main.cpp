@@ -1,10 +1,7 @@
 #include <SDL2/SDL.h>
-#include <assimp/postprocess.h>  // Post processing flags
-#include <assimp/scene.h>        // Output data structure
 #include <math.h>
 
 #include <algorithm>            // for std::for_each
-#include <assimp/Importer.hpp>  // C++ importer interface
 #include <iostream>
 #include <memory>
 
@@ -52,6 +49,7 @@ int main(int argc, char** argv) {
 
 
   Shader shader("../shaders/basicShader");
+  shader._model = &model;
   Texture texture("../res/arrow.jpg");
   Texture texture2;
   Transform transform;
@@ -98,8 +96,9 @@ int main(int argc, char** argv) {
 
     display.Clear(1.0f, 1.0f, 1.0f, 1.0f);
 
-    float sinCounter = sinf(counter);
-    float absSinCounter = abs(sinCounter);
+    float redCounter = (1 + cosf(counter)) * 0.5;
+    float blueCounter = (1 + cosf(counter + M_PI)) * 0.5;
+    float greenCounter = (1 + cosf(counter + M_PI_2f32)) * 0.5;
 
     // transform.GetRot()->y = counter * 100;
     // transform.GetPos()->x = sinCounter;
@@ -116,7 +115,6 @@ int main(int argc, char** argv) {
         texture.Bind();
 
       } else {
-        i->_color += glm::vec4(0.01, 0.01, 0.01, 1.0);
         texture2.Bind();
       }
       // i->SetRot(increment);

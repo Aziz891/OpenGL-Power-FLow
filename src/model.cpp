@@ -5,7 +5,7 @@
 model::model(std::vector<bus> busses, std::vector<line> lines)
     : _n_busses(busses.size()), _busses(busses), _lines(lines) {
   _admit.resize(_n_busses, _n_busses);
-  std::for_each(lines.begin(), lines.end(), [&](line &i) {
+  std::for_each(lines.begin(), lines.end(), [&](line& i) {
     _admit(i._from_bus, i._from_bus) += (std::complex<double>(1, 0) / i._z);
     _admit(i._from_bus, i._to_bus) = (std::complex<double>(-1, 0) / i._z);
     _admit(i._to_bus, i._to_bus) += (std::complex<double>(1, 0) / i._z);
@@ -21,10 +21,12 @@ model::~model() {}
 void model::generate_admit() {
   _n_busses = _busses.size();
   _admit.resize(_n_busses, _n_busses);
-  std::for_each(_lines.begin(), _lines.end(), [&](line &i) {
-    _admit(i._from_bus, i._from_bus) += (std::complex<double>(1, 0) / i._z) + i._shunt_admit[0] ;
+  std::for_each(_lines.begin(), _lines.end(), [&](line& i) {
+    _admit(i._from_bus, i._from_bus) +=
+        (std::complex<double>(1, 0) / i._z) + i._shunt_admit[0];
     _admit(i._from_bus, i._to_bus) += (std::complex<double>(-1, 0) / i._z);
-    _admit(i._to_bus, i._to_bus) += (std::complex<double>(1, 0) / i._z) + i._shunt_admit[1];
+    _admit(i._to_bus, i._to_bus) +=
+        (std::complex<double>(1, 0) / i._z) + i._shunt_admit[1];
     _admit(i._to_bus, i._from_bus) += (std::complex<double>(-1, 0) / i._z);
   });
 
@@ -63,4 +65,13 @@ double model::calc_q(size_t i) {
             (sin(std::arg(_admit(i, k)) - _busses[i].angle + _busses[k].angle));
   }
   return test;
+}
+
+std::pair<double, double> model::getMaxFlow() {
+  auto max = std::minmax_element(
+      _lines.begin(), _lines.end(), [](const line& a, const line& b) {
+        return std::abs(a.flows.first) < std::abs(b.flows.first);
+      });
+  return std::pair<double, double>(std::abs(max.first->flows.first),
+                                   std::abs(max.second->flows.first));
 }

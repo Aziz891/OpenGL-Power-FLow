@@ -7,7 +7,7 @@
 #include <glm/gtx/transform.hpp>
 #include <string>
 #include <vector>
-
+#include "model.hpp"
 #include "obj_loader.h"
 
 enum mesh_type { none, line_segment, substation };
@@ -37,11 +37,12 @@ class Mesh {
   Mesh(const std::string fileName, glm::vec3 pos = glm::vec3(),
        glm::vec3 rot = glm::vec3(),
        glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f),
-       mesh_type type = mesh_type::substation, glm::vec4 color = glm::vec4(0.0, 0.0, 0.0, 0.0));
+       mesh_type type = mesh_type::substation
+       );
   Mesh(Vertex* vertices, unsigned int numVertices, unsigned int* indices,
        unsigned int numIndices);
 
-  glm::vec4 _color;
+  line* _line_ptr =NULL ;
   void Draw();
 
   glm::mat4 GetModel(glm::mat4 coord = glm::mat4(1.0f)) const {
@@ -63,12 +64,12 @@ class Mesh {
   }
 
   virtual ~Mesh();
+  double GetFlow();
   inline glm::vec3* GetPos() { return &_pos; }
   inline glm::vec3* GetRot() { return &_rot; }
   inline glm::vec3* GetScale() { return &_scale; }
   inline glm::mat4& GetCoord() { return _coord; }
   inline mesh_type GetType() { return _type; }
-  inline glm::vec4& GetColor() { return _color; }
 
   inline void SetPos(glm::vec3 pos) { this->_pos = pos; }
   inline void SetCoord(glm::mat4 coord) { this->_coord = coord; }

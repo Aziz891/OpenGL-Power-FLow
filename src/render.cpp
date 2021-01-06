@@ -4,12 +4,19 @@ Renderer::Renderer(l_order &lines, model &model)
     : line_order(lines), _model(model) {}
 
 Renderer::~Renderer() {}
+/*
+ x : -90 to 90
+ z: 0 to 360
+
+ increment : f(factor) = 180 / factor;
+*/
 
 std::vector<std::unique_ptr<Mesh>> Renderer::render() {
   std::vector<std::unique_ptr<Mesh>> meshes;
   std::map<int, int> rendered_busses;
   float scaling_factor = 60.0;
-  float rot_angle = 0.0f;
+  float rot_angle_x = 0.0f;
+  float rot_angle_z = 0.0f;
   const float line_wdith = 0.5;
   for (auto &_bus : line_order) {
     // if (_bus.first > 3) break;
@@ -21,7 +28,8 @@ std::vector<std::unique_ptr<Mesh>> Renderer::render() {
     }
     auto bus_new_coord = meshes[rendered_busses[_bus.first]]->GetCoord();
     float factor = _bus.second.size()  ;
-    rot_angle = (float)0.0f;
+    rot_angle_x = (float)0.0f;
+    rot_angle_z = (float)0.0f;
     for (auto &i : _bus.second) {
       if (rendered_busses.find(_model._lines[i]._to_bus + 1) ==
           rendered_busses.end()) {
@@ -33,7 +41,11 @@ std::vector<std::unique_ptr<Mesh>> Renderer::render() {
         meshes.back()->SetCoord(
             bus_new_coord *
 
-            glm::rotate(rot_angle, glm::vec3(1.0f, 1.0f, 1.0f)));
+            glm::rotate(rot_angle_z, glm::vec3(0.0f, 0.0f, 1.0f))  * 
+            glm::rotate(rot_angle_x , glm::vec3(1.0f, 0.0f, 0.0f)) 
+
+            );
+        meshes.back()->_line_ptr = &(_model._lines[i]);
         auto line_new_coord = meshes.back()->GetCoord();
 
         meshes.push_back(std::make_unique<Mesh>(
@@ -61,14 +73,16 @@ std::vector<std::unique_ptr<Mesh>> Renderer::render() {
         meshes.push_back(std::make_unique<Mesh>(
             "../res/line.obj", glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.5f, glm::distance(sample, sample2), 0.5f)));
+            glm::vec3(line_wdith, glm::distance(sample, sample2), line_wdith) , mesh_type::line_segment));
+        meshes.back()->_line_ptr = &(_model._lines[i]);
         meshes.back()->SetCoord(bus_new_coord *
 
                                 glm::rotate(1.0f * (float)angle_rot, rot_axis));
 
         std::cout << "";
       }
-      rot_angle +=   2.0f  * M_PI / factor;
+      rot_angle_x +=      M_PI / factor;
+      rot_angle_z +=   2.0f  * M_PI / factor;
     }
   }
   return (std::move(meshes));

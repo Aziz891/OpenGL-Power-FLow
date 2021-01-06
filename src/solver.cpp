@@ -66,7 +66,6 @@ void solver::calculate_deltas() {
   }
   auto max = std::max_element(mismatch.begin(), mismatch.end());
 
-
   std::cout << "===============>>>" << std::endl;
   std::cout << *max << std::endl;
   // std::cout << "";
@@ -122,7 +121,18 @@ void solver::solve() {
     // std::cout << sol << std::endl ;
   }
 
+  std::for_each(_model._lines.begin(), _model._lines.end(), [&](line &i) {
+    i.flows.first = 100.0 * _model._busses[i._from_bus].getRect() *
+                    std::conj(_model._admit(i._from_bus, i._to_bus) *
+                              (_model._busses[i._from_bus].getRect() -
+                               _model._busses[i._to_bus].getRect() ));
+    i.flows.second = 100.0 *  _model._busses[i._to_bus].getRect() *
+                    std::conj(_model._admit(i._to_bus, i._from_bus) *
+                              (_model._busses[i._to_bus].getRect() -
+                               _model._busses[i._from_bus].getRect() ));
+  });
   std::for_each(_model._busses.begin(), _model._busses.end(), [](bus &i) {
-    std::cout << i._number<< " : " << i.voltage << "< " << i.angle * (180 / M_PI) << std::endl;
+    std::cout << i._number << " : " << i.voltage << "< "
+              << i.angle * (180 / M_PI) << std::endl;
   });
 }

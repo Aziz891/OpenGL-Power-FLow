@@ -5,17 +5,19 @@
 #include <GL/glew.h>
 #include "transform.h"
 #include "mesh.h"
+#include<complex>
 
 class Shader
 {
 public:
 	Shader(const std::string& fileName);
-	Shader(const glm::vec4 color);
 
 	void Bind();
 	void Update(const Transform& transform, const Camera& camera,  Mesh& mesh);
+	std::pair<std::complex<double>, std::complex<double>> _minmax_colors;
 
 	virtual ~Shader();
+	model* _model;
 protected:
 private:
 	static const unsigned int NUM_SHADERS = 2;
@@ -30,7 +32,6 @@ private:
 	GLuint m_program;
 	GLuint m_shaders[NUM_SHADERS];
 	GLuint m_uniforms[NUM_UNIFORMS];
-	glm::vec4 _color = glm::vec4(1.0, 1.0, 0.0,  1.0) ;
 };
 
 #endif

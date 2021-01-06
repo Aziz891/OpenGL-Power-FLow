@@ -9,5 +9,5 @@ uniform vec4 Test;
 void main()
 {
 	gl_FragColor = (texture2D(sampler, texCoord0) + Test) * 
-		clamp(dot(-lightDirection, normal0), 0.5, 1.0);
+		clamp(dot(-lightDirection, normal0), 0.2, 1.0);
 }

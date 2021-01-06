@@ -3,6 +3,7 @@
 #include "Graph.hpp"
 #include "mesh.h"
 #include "model.hpp"
+#include <memory>
 class Renderer {
  private:
   /* data */

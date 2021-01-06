@@ -14,6 +14,7 @@ private:
 public:
     bus(double value, double value2, std::string name, int number , bus_type type );
     ~bus();
+inline std::complex<double> getRect() { return std::polar(voltage, angle);}
 double voltage = 1;
 double angle = 0;
 bus_type _type;

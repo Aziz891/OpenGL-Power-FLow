@@ -23,6 +23,7 @@ class model {
   model();
   void generate_admit();
   ~model();
+  std::pair<double, double> getMaxFlow();
   double calc_p(size_t i);
   double calc_q(size_t i);
 };

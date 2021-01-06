@@ -1,33 +1,9 @@
 #include "shader.h"
 #include <iostream>
 #include <fstream>
+#include <math.h>
 
 
-Shader::Shader(const glm::vec4 color): _color(color) {
-    std::string fileName = "basicShader";
-    
-	m_program = glCreateProgram();
-	m_shaders[0] = CreateShader(LoadShader(fileName + ".vs"), GL_VERTEX_SHADER);
-	m_shaders[1] = CreateShader(LoadShader(fileName + ".fs"), GL_FRAGMENT_SHADER);
-
-	for(unsigned int i = 0; i < NUM_SHADERS; i++)
-		glAttachShader(m_program, m_shaders[i]);
-
-	glBindAttribLocation(m_program, 0, "position");
-	glBindAttribLocation(m_program, 1, "texCoord");
-	glBindAttribLocation(m_program, 2, "normal");
-
-	glLinkProgram(m_program);
-	CheckShaderError(m_program, GL_LINK_STATUS, true, "Error linking shader program");
-
-	glValidateProgram(m_program);
-	CheckShaderError(m_program, GL_LINK_STATUS, true, "Invalid shader program");
-
-	m_uniforms[0] = glGetUniformLocation(m_program, "MVP");
-	m_uniforms[1] = glGetUniformLocation(m_program, "Normal");
-	m_uniforms[2] = glGetUniformLocation(m_program, "lightDirection");
-	m_uniforms[3] = glGetUniformLocation(m_program, "Test");
-}
 Shader::Shader(const std::string& fileName)
 {
 	m_program = glCreateProgram();
@@ -73,7 +49,15 @@ void Shader::Update(const Transform& transform, const Camera& camera,  Mesh& mes
 {
 	glm::mat4 MVP = transform.GetMVP(camera, mesh);
 	glm::mat4 Normal = transform.GetModel();
-	glm::vec4 Test = mesh.GetColor();
+	glm::vec4 Test = glm::vec4(0.0, 0.0, 0.0, 1.0 );
+	auto flow = mesh.GetFlow();
+    if ( flow > -1) {
+    auto minmax = _model->getMaxFlow();
+    auto redColor =  (flow - minmax.first) / (minmax.second - 150.0 ) ;
+    auto blueColor =  (minmax.second - 150.0 - flow ) / (minmax.second - 150.0 ) ;
+    Test = glm::vec4( std::min(redColor, 1.0), 0, std::max(blueColor, 0.0),1);
+
+    }
 	// glm::mat4 Test = glm::mat4(2.0f);
 
 	glUniformMatrix4fv(m_uniforms[0], 1, GL_FALSE, &MVP[0][0]);
