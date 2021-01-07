@@ -14,6 +14,16 @@ A .raw file representing the IEEE 30 bus case is provided as an example.
 - [Eigen](http://eigen.tuxfamily.org/)
 - [OpenGL Mathematics (GLM)](https://github.com/g-truc/glm)
 
+##Build Instructions
+```Shell
+mkdir build && cd build/
+sudo apt install libglm-dev # glm is not installed in workspace
+cmake ..
+make
+```
+
+
+
 
 ##Sample Output
 Bus Voltages:
