@@ -63,3 +63,6 @@ Bus Voltages:
 Rendering:
 ![GitHub Logo](/res/screenshot.png)
 
+##Credits
+OpenGL code is derived [this OpenGL Repository](https://github.com/BennyQBD/ModernOpenGLTutorial)
+
